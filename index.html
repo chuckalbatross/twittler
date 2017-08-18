@@ -7,7 +7,7 @@
   <body>
     <script>
 
-      $(document).ready(function(){
+        //GLOBALS
         var $body = $('body');
         $body.html('');
         var index;
@@ -15,47 +15,57 @@
         var lastTweetIndex;
         var showTimeline = false;
 
+        //Append the tweets residing in streams.home array
         function homepageTweets() {
-          var index = streams.home.length - 1;
-          lastTweetIndex = index + 1;
+          index = streams.home.length - 1;
+          lastTweetIndex = index;
           while(index >= 0) {
             appendTweet(index);
             index -= 1;
           }    
-        }
-
-        //append tweets to page
+        };
+        
+        //Build up HTML element representing a user's tweet
+        //Append tweets to page
         function appendTweet(num) {          
           var tweet = streams.home[num];
-          var $tweet = $('<div class=\'user_' + tweet.user + '\'></div>');
-          $tweet.html("<class = '" + tweet.user + "'>@" + tweet.user + ': ' + tweet.message + ': ' + "<br />" + tweet.created_at);
+          var $tweet = $("<div class='user_" + tweet.user + "'></div>");
+          $tweet.html("<strong class='" + tweet.user + "'>@" + tweet.user + '</strong>: ' + tweet.message + '<br />' + tweet.created_at);
           $tweet.appendTo($body);
         }
-
+        
+        //Ever 1.5s, append new tweets (tweets newly added to streams.home array)
         function fetchNewTweets() {
           fetchNewTweetsTiming = setInterval(function() {
-            for (var i = lastTweetIndex; i < streams.home.length; i++) {
+            for (var i = lastTweetIndex + 1; i < streams.home.length - 1; i++) {
               appendTweet(i);
               lastTweetIndex = i;
             }
           }, 1500)
         }
         
+        //Remove tweets of other users (other as in those who aren't the owner of the timeline)
+        //Append a button for "return to homepage" event listener.
         function showUserTimeline(user1, user2, user3) {
           if (showTimeline === false) {
             $(user1).remove();
             $(user2).remove();
             $(user3).remove();
             clearInterval(fetchNewTweetsTiming);
-            var $btn = $("<div class='backToHome' value='Return to Homepage'></div>");
+            var $btn = $("<div class='backToHome'></div>");
+            $btn.html("Back to Homepage")
             $btn.appendTo($body);
             showTimeline = true;           
           }
         }
 
+      $(document).ready(function(){
+
+        //initialize homepage
         homepageTweets();
         fetchNewTweets();
 
+        //event listeners (when username is clicked, show their user timeline)
         }).on('click', '.shawndrost', function() {
           showUserTimeline('.user_sharksforcheap', '.user_mracus', '.user_douglascalhoun');
         }).on('click', '.sharksforcheap', function() {
@@ -64,12 +74,14 @@
           showUserTimeline('.user_shawndrost', '.user_sharksforcheap', '.user_mracus');
         }).on('click', '.douglascalhoun', function() {
           showUserTimeline('.user_shawndrost', '.user_sharksforcheap', '.user_mracus');
+        //Back to homepage button (when clicked, remove user timeline elements <div></div> and reinitialize homepage)
         }).on('click', '.backToHome', function() {
           $('div').remove();
           showTimeline = false;
           homepageTweets();
           fetchNewTweets();
         });
+
 
 
 
