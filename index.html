@@ -10,17 +10,70 @@
       $(document).ready(function(){
         var $body = $('body');
         $body.html('');
+        var index;
+        var fetchNewTweetsTiming;
+        var lastTweetIndex;
+        var showTimeline = false;
 
-        var index = streams.home.length - 1;
-        while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
-          index -= 1;
+        function homepageTweets() {
+          var index = streams.home.length - 1;
+          lastTweetIndex = index + 1;
+          while(index >= 0) {
+            appendTweet(index);
+            index -= 1;
+          }    
         }
 
-      });
+        //append tweets to page
+        function appendTweet(num) {          
+          var tweet = streams.home[num];
+          var $tweet = $('<div class=\'user_' + tweet.user + '\'></div>');
+          $tweet.html("<class = '" + tweet.user + "'>@" + tweet.user + ': ' + tweet.message + ': ' + "<br />" + tweet.created_at);
+          $tweet.appendTo($body);
+        }
+
+        function fetchNewTweets() {
+          fetchNewTweetsTiming = setInterval(function() {
+            for (var i = lastTweetIndex; i < streams.home.length; i++) {
+              appendTweet(i);
+              lastTweetIndex = i;
+            }
+          }, 1500)
+        }
+        
+        function showUserTimeline(user1, user2, user3) {
+          if (showTimeline === false) {
+            $(user1).remove();
+            $(user2).remove();
+            $(user3).remove();
+            clearInterval(fetchNewTweetsTiming);
+            var $btn = $("<div class='backToHome' value='Return to Homepage'></div>");
+            $btn.appendTo($body);
+            showTimeline = true;           
+          }
+        }
+
+        homepageTweets();
+        fetchNewTweets();
+
+        }).on('click', '.shawndrost', function() {
+          showUserTimeline('.user_sharksforcheap', '.user_mracus', '.user_douglascalhoun');
+        }).on('click', '.sharksforcheap', function() {
+          showUserTimeline('.user_shawndrost', '.user_mracus', '.user_douglascalhoun');
+        }).on('click', '.mracus', function() {
+          showUserTimeline('.user_shawndrost', '.user_sharksforcheap', '.user_mracus');
+        }).on('click', '.douglascalhoun', function() {
+          showUserTimeline('.user_shawndrost', '.user_sharksforcheap', '.user_mracus');
+        }).on('click', '.backToHome', function() {
+          $('div').remove();
+          showTimeline = false;
+          homepageTweets();
+          fetchNewTweets();
+        });
+
+
+
+      
 
     </script>
   </body>
